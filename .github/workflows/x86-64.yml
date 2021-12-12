@@ -290,6 +290,12 @@ jobs:
           $GITHUB_WORKSPACE/scripts/preset-terminal-tools.sh
           make defconfig
 
+      - name: SSH connection to Actions
+        uses: P3TERX/ssh2actions@v1.0.0
+        env:
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          
       - name: Download DL Package
         id: download
         run: |
@@ -361,11 +367,15 @@ jobs:
           name: bin-archive
           path: ${{ env.OPENWRT_ROOT_PATH }}/${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}.zip
 
-      - name: SSH connection to Actions
-        uses: P3TERX/ssh2actions@v1.0.0
-        env:
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      - name: Watting for manual stop
+        env: 
+          STOP_FILE: "/tmp/stop"
+          TMATE_SOCKL: "/tmp/tmate.sock"
+        run: |
+          echo -e "TIPS: The build is complete, waiting to run `touch ${STOP_FILE}` to end the actions." \
+          while [[ -S ${TMATE_SOCK} ]]; do sleep 1; if [[ -e ${CONTINUE_FILE} ]]; then echo -e "${INFO} Continue to the next step."; exit 0; fi; done
+        shell: bash
+
         
   Upload:
     needs: [Build, Toolchain]
