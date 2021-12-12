@@ -280,7 +280,7 @@ jobs:
           [ -e files ] && mv files $OPENWRT_ROOT_PATH/files
           [ -e $CONFIG_FILE ] && mv $CONFIG_FILE $OPENWRT_ROOT_PATH/.config
           cat config/general-packages.config >> $OPENWRT_ROOT_PATH/.config
-          cat config/extra-drivers.config >> $OPENWRT_ROOT_PATH/.config
+          # cat config/extra-drivers.config >> $OPENWRT_ROOT_PATH/.config
           cd $OPENWRT_ROOT_PATH
           chmod +x $GITHUB_WORKSPACE/scripts/*.sh
           $GITHUB_WORKSPACE/$DIY_SH
@@ -309,6 +309,9 @@ jobs:
           make target/compile -j$(nproc) || make target/compile -j1 V=s IGNORE_ERRORS=1
           make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j1 V=s IGNORE_ERRORS=1
           make package/index
+          if [ "$?" -ne 0 ]; then
+            echo -e "TIPS: There are errors that need to be debug, waiting to run `touch ${CONTINUE_FILE}` to end the actions."
+            while true; do sleep 1; if [[ -e ${CONTINUE_FILE} ]]; then echo -e "${INFO} Continue to the next step."; exit 0; fi; done
 
       - name: Generate Firmware
         id: generate
@@ -370,8 +373,8 @@ jobs:
           STOP_FILE: "/tmp/stop"
           TMATE_SOCKL: "/tmp/tmate.sock"
         run: |
-          echo -e "TIPS: The build is complete, waiting to run `touch ${STOP_FILE}` to end the actions." \
-          while [[ -S ${TMATE_SOCK} ]]; do sleep 1; if [[ -e ${CONTINUE_FILE} ]]; then echo -e "${INFO} Continue to the next step."; exit 0; fi; done
+          echo -e "TIPS: The build is complete, waiting to run `touch ${STOP_FILE}` to end the actions."
+          while [[ -S ${TMATE_SOCK} ]]; do sleep 1; if [[ -e ${STOP_FILE} ]]; then echo -e "${INFO} Continue to the next step."; exit 0; fi; done
         shell: bash
 
         
