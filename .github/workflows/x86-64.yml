@@ -310,9 +310,10 @@ jobs:
           make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j1 V=s IGNORE_ERRORS=1
           make package/index
           if [ "$?" -ne 0 ]; then
-            echo -e "TIPS: There are errors that need to be debug, waiting to run `touch ${CONTINUE_FILE}` to end the actions."
+            echo -e "TIPS: There are errors that need to be debug, waiting to run $(touch ${CONTINUE_FILE}) to end the actions."
             while true; do sleep 1; if [[ -e ${CONTINUE_FILE} ]]; then echo -e "${INFO} Continue to the next step."; exit 0; fi; done
-
+          fi
+          
       - name: Generate Firmware
         id: generate
         run: |
