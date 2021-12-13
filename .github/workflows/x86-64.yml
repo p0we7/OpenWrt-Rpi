@@ -307,7 +307,8 @@ jobs:
           make buildinfo
           make diffconfig buildversion feedsversion
           make target/compile -j$(nproc) || make target/compile -j1 V=s IGNORE_ERRORS=1
-          make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j1 V=s IGNORE_ERRORS=1
+          # make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j1 V=s IGNORE_ERRORS=1
+          make package/compile -j1 V=s IGNORE_ERRORS=1
           make package/index
           if [ "$?" -ne 0 ]; then
             echo -e "TIPS: There are errors that need to be debug, waiting to run $(touch ${CONTINUE_FILE}) to end the actions."
